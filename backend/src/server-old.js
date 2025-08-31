@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const artworkRoutes = require('./routes/artworks');
 const commissionRoutes = require('./routes/commissions');
 const settingsRoutes = require('./routes/settings');
+// const uploadRoutes = require('./routes/upload'); // Temporarily disabled
 
 const app = express();
 
@@ -28,20 +29,23 @@ app.use(cors({
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
+  message: 'Too many requests from this IP, please try again later.'
 });
-app.use(limiter);
+app.use('/api', limiter);
 
-// Body parsing middleware
+// Stricter rate limiting for commission submissions
+const commissionLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // limit each IP to 5 commission submissions per hour
+  message: 'Too many commission submissions, please try again later.'
+});
+app.use('/api/commissions', commissionLimiter);
+
+// Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files
-app.use('/uploads', express.static('uploads'));
-
-// Logging middleware
+// Logging
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
@@ -51,8 +55,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    uptime: process.uptime()
   });
 });
 
@@ -61,6 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/artworks', artworkRoutes);
 app.use('/api/commissions', commissionRoutes);
 app.use('/api/settings', settingsRoutes);
+// app.use('/api/upload', uploadRoutes); // Temporarily disabled
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -85,8 +89,7 @@ mongoose.connect(MONGODB_URI)
     console.log('✅ Connected to MongoDB');
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📝 API Health Check: http://localhost:${PORT}/api/health`);
-      console.log(`🌐 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
+      console.log(`📝 API Documentation: http://localhost:${PORT}/api/health`);
     });
   })
   .catch(err => {
@@ -97,7 +100,6 @@ mongoose.connect(MONGODB_URI)
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT} (without database)`);
       console.log(`📝 API Health Check: http://localhost:${PORT}/api/health`);
-      console.log(`🌐 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
       console.log('💡 To enable full functionality, configure MongoDB connection in .env file');
     });
   });

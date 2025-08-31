@@ -1,30 +1,15 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from 'react-query';
 import { ArrowLeftIcon, TagIcon, CalendarIcon } from '@heroicons/react/24/outline';
-import { artworksAPI } from '../utils/api';
-import { formatPrice, formatDate, getMediumColor } from '../utils/helpers';
+import { getArtworkById } from '../data/mockArtworks';
+import { formatPrice, getMediumColor } from '../utils/helpers';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 const ArtworkDetail = () => {
   const { id } = useParams();
-  
-  const { data: artwork, isLoading, error } = useQuery(
-    ['artwork', id],
-    () => artworksAPI.getById(id),
-    {
-      select: (data) => data.data,
-    }
-  );
+  const artwork = getArtworkById(id);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="loading-spinner w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full"></div>
-      </div>
-    );
-  }
-
-  if (error || !artwork) {
+  if (!artwork) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -61,19 +46,20 @@ const ArtworkDetail = () => {
             <div>
               <div className="space-y-4">
                 <div className="aspect-w-4 aspect-h-3">
-                  <img
-                    src={artwork.images[0]?.url || 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800'}
+                  <ImageWithFallback
+                    src={artwork.images.main}
+                    fallback={artwork.images.fallback}
                     alt={artwork.title}
                     className="w-full h-96 object-cover rounded-lg shadow-lg"
                   />
                 </div>
                 
-                {artwork.images.length > 1 && (
+                {artwork.images.thumbnails && artwork.images.thumbnails.length > 1 && (
                   <div className="grid grid-cols-3 gap-4">
-                    {artwork.images.slice(1, 4).map((image, index) => (
+                    {artwork.images.thumbnails.slice(1, 4).map((image, index) => (
                       <img
                         key={index}
-                        src={image.url}
+                        src={image}
                         alt={`${artwork.title} - View ${index + 2}`}
                         className="w-full h-24 object-cover rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow duration-200"
                       />
@@ -98,10 +84,10 @@ const ArtworkDetail = () => {
                   
                   <span className="inline-flex items-center text-gray-600">
                     <CalendarIcon className="h-4 w-4 mr-1" />
-                    {artwork.year}
+                    {artwork.yearCreated}
                   </span>
                   
-                  {artwork.isForSale && artwork.price && (
+                  {artwork.isAvailable && artwork.price && (
                     <span className="text-2xl font-bold text-primary-600">
                       {formatPrice(artwork.price)}
                     </span>
@@ -117,6 +103,24 @@ const ArtworkDetail = () => {
                   </p>
                 </div>
 
+                {artwork.inspiration && (
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">Inspiration</h2>
+                    <p className="text-gray-600 leading-relaxed">
+                      {artwork.inspiration}
+                    </p>
+                  </div>
+                )}
+
+                {artwork.technique && (
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">Technique</h2>
+                    <p className="text-gray-600 leading-relaxed">
+                      {artwork.technique}
+                    </p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900 mb-2">Medium</h3>
@@ -124,13 +128,18 @@ const ArtworkDetail = () => {
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-2">Size</h3>
-                    <p className="text-gray-600">{artwork.size}</p>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Dimensions</h3>
+                    <p className="text-gray-600">{artwork.dimensions}</p>
                   </div>
                   
                   <div>
                     <h3 className="text-sm font-medium text-gray-900 mb-2">Year</h3>
-                    <p className="text-gray-600">{artwork.year}</p>
+                    <p className="text-gray-600">{artwork.yearCreated}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Category</h3>
+                    <p className="text-gray-600 capitalize">{artwork.category}</p>
                   </div>
                   
                   <div>

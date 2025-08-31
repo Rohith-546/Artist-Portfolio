@@ -1,18 +1,37 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ArrowRightIcon, PaintBrushIcon, SparklesIcon, HeartIcon } from '@heroicons/react/24/outline';
-import { useQuery } from 'react-query';
-import { artworksAPI } from '../utils/api';
+import { getFeaturedArtworks } from '../data/mockArtworks';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 const Home = () => {
-  // Fetch featured artworks
-  const { data: artworksData } = useQuery(
-    ['featured-artworks'],
-    () => artworksAPI.getAll({ limit: 6, isVisible: true }),
-    {
-      select: (data) => data.data,
+  // Get featured artworks from mock data
+  const featuredArtworks = getFeaturedArtworks();
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.2,
+        staggerChildren: 0.1
+      }
     }
-  );
+  };
+
+  const itemVariants = {
+    hidden: { y: 30, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
 
   const features = [
     {
@@ -33,79 +52,163 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <motion.div 
+      className="min-h-screen"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-50 to-white section-padding">
+      <motion.section 
+        className="relative bg-gradient-to-br from-primary-50 to-white section-padding"
+        variants={itemVariants}
+      >
         <div className="container-max">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in">
-              <h1 className="text-5xl lg:text-6xl font-serif font-bold text-gray-900 mb-6">
+            <motion.div variants={containerVariants}>
+              <motion.h1 
+                className="text-5xl lg:text-6xl font-serif font-bold text-gray-900 mb-6"
+                variants={itemVariants}
+              >
                 Where Art Meets
-                <span className="text-gradient block">Imagination</span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                <motion.span 
+                  className="text-gradient block"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  Imagination
+                </motion.span>
+              </motion.h1>
+              <motion.p 
+                className="text-xl text-gray-600 mb-8 leading-relaxed"
+                variants={itemVariants}
+              >
                 Discover a world of beautiful artworks and commission custom pieces 
                 that capture your unique vision. From traditional paintings to digital 
                 masterpieces, we bring your dreams to life through art.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/gallery" className="btn-primary">
-                  View Gallery
-                  <ArrowRightIcon className="ml-2 h-5 w-5" />
-                </Link>
-                <Link to="/commission" className="btn-outline">
-                  Commission Artwork
-                </Link>
-              </div>
-            </div>
+              </motion.p>
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4"
+                variants={itemVariants}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link to="/gallery" className="btn-primary">
+                    View Gallery
+                    <ArrowRightIcon className="ml-2 h-5 w-5" />
+                  </Link>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link to="/commission" className="btn-outline">
+                    Commission Artwork
+                  </Link>
+                </motion.div>
+              </motion.div>
+            </motion.div>
             
-            <div className="relative animate-slide-up">
-              <div className="relative z-10">
+            <motion.div 
+              className="relative"
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div 
+                className="relative z-10"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
                 <img
                   src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&h=400&fit=crop"
                   alt="Featured Artwork"
                   className="rounded-lg shadow-2xl w-full h-96 object-cover"
                 />
-              </div>
-              <div className="absolute -bottom-4 -right-4 w-full h-full bg-gradient-to-br from-primary-200 to-primary-300 rounded-lg -z-10"></div>
-            </div>
+              </motion.div>
+              <motion.div 
+                className="absolute -bottom-4 -right-4 w-full h-full bg-gradient-to-br from-primary-200 to-primary-300 rounded-lg -z-10"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+              />
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Features Section */}
-      <section className="section-padding bg-white">
+      <motion.section 
+        className="section-padding bg-white"
+        variants={itemVariants}
+      >
         <div className="container-max">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif font-bold text-gray-900 mb-4">
+          <motion.div 
+            className="text-center mb-16"
+            variants={containerVariants}
+          >
+            <motion.h2 
+              className="text-4xl font-serif font-bold text-gray-900 mb-4"
+              variants={itemVariants}
+            >
               Why Choose Our Art
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+              variants={itemVariants}
+            >
               We're passionate about creating meaningful art that connects with people. 
               Here's what makes our work special.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            variants={containerVariants}
+          >
             {features.map((feature, index) => (
-              <div key={index} className="text-center animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-6">
+              <motion.div 
+                key={index} 
+                className="text-center"
+                variants={itemVariants}
+                custom={index}
+                whileHover={{ y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <motion.div 
+                  className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-6"
+                  whileHover={{ 
+                    scale: 1.1,
+                    backgroundColor: '#6366F1',
+                    transition: { duration: 0.3 }
+                  }}
+                >
                   <feature.icon className="h-8 w-8 text-primary-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                </motion.div>
+                <motion.h3 
+                  className="text-xl font-semibold text-gray-900 mb-4"
+                  variants={itemVariants}
+                >
                   {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
+                </motion.h3>
+                <motion.p 
+                  className="text-gray-600 leading-relaxed"
+                  variants={itemVariants}
+                >
                   {feature.description}
-                </p>
-              </div>
+                </motion.p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Featured Artworks Section */}
-      {artworksData?.artworks?.length > 0 && (
+      {featuredArtworks.length > 0 && (
         <section className="section-padding bg-gray-50">
           <div className="container-max">
             <div className="text-center mb-16">
@@ -119,16 +222,17 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {artworksData.artworks.slice(0, 6).map((artwork, index) => (
+              {featuredArtworks.map((artwork, index) => (
                 <Link 
-                  key={artwork._id} 
-                  to={`/artwork/${artwork._id}`}
+                  key={artwork.id} 
+                  to={`/artwork/${artwork.id}`}
                   className="card-hover animate-slide-up"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="aspect-w-4 aspect-h-3">
-                    <img
-                      src={artwork.images[0]?.url || 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400'}
+                    <ImageWithFallback
+                      src={artwork.images.main}
+                      fallback={artwork.images.fallback}
                       alt={artwork.title}
                       className="w-full h-64 object-cover"
                     />
@@ -185,7 +289,7 @@ const Home = () => {
           </div>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 };
 
